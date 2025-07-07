@@ -28,3 +28,13 @@ exports.getOrderDetails = async (req, res) => {
     res.status(500).json({ error: 'Failed to fetch order items' });
   }
 };
+
+exports.getAllOrders = async (req, res) => {
+  try {
+    const orders = await orderModel.getAllOrders();
+    res.json(orders);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch all orders' });
+  }
+};
+

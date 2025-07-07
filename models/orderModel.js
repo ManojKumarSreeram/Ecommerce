@@ -73,3 +73,13 @@ exports.getOrderItems = async (orderId) => {
   );
   return result.rows;
 };
+
+exports.getAllOrders = async () => {
+  const result = await pool.query(`
+    SELECT o.*, u.email
+    FROM orders o
+    JOIN users u ON o.user_id = u.id
+    ORDER BY o.created_at DESC
+  `);
+  return result.rows;
+};
