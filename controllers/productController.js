@@ -11,13 +11,20 @@ exports.createProduct = async (req, res) => {
 };
 
 exports.getAllProducts = async (req, res) => {
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 10;
+  const search = req.query.search || '';
+  const category = req.query.category || '';
+
   try {
-    const products = await productModel.getAllProducts();
-    res.json(products);
+    const result = await productModel.getAllProducts(page, limit, search, category);
+    res.json(result);
   } catch (err) {
+    console.error(err);
     res.status(500).json({ error: 'Failed to fetch products' });
   }
 };
+
 
 exports.getProductById = async (req, res) => {
   try {

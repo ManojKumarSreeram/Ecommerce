@@ -13,9 +13,41 @@ exports.createProduct = async (product) => {
 };
 
 // Get all products (public view)
-exports.getAllProducts = async () => {
-  const result = await pool.query(`SELECT * FROM products ORDER BY created_at DESC`);
-  return result.rows;
+exports.getAllProducts = async (page = 1, limit = 10, search = '', category = '') => {
+  const offset = (page - 1) * limit;
+
+  let query = `SELECT * FROM products WHERE 1=1`;
+  let countQuery = `SELECT COUNT(*) FROM products WHERE 1=1`;
+  const values = [];
+  const countValues = [];
+
+  if (search) {
+    query += ` AND name ILIKE $${values.length + 1}`;
+    countQuery += ` AND name ILIKE $${countValues.length + 1}`;
+    values.push(`%${search}%`);
+    countValues.push(`%${search}%`);
+  }
+
+  if (category) {
+    query += ` AND category ILIKE $${values.length + 1}`;
+    countQuery += ` AND category ILIKE $${countValues.length + 1}`;
+    values.push(`%${category}%`);
+    countValues.push(`%${category}%`);
+  }
+
+  query += ` ORDER BY created_at DESC LIMIT $${values.length + 1} OFFSET $${values.length + 2}`;
+  values.push(limit);
+  values.push(offset);
+
+  const data = await pool.query(query, values);
+  const count = await pool.query(countQuery, countValues);
+
+  return {
+    products: data.rows,
+    total: parseInt(count.rows[0].count),
+    page,
+    limit
+  };
 };
 
 // Get single product by ID
